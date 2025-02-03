@@ -1,0 +1,11 @@
+name: helioplant-env
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - pandas
+  - numpy
+  - shapely
+  - sklearn
+  - seaborn
+  - matplotlib
