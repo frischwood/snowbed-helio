@@ -51,12 +51,12 @@ class HP_plotter():
                 12:self.stat_path / f"mesh_{self.sd}" / self.sector_type / "INTERSPACE_12.csv"
                 },
             "GROUP SIZE":{
-                3:self.stat_path / f"mesh_{self.sd}" / self.sector_type / "FOREST_9.csv",
-                4:self.stat_path / f"mesh_{self.sd}" / self.sector_type / "FOREST_16.csv",
-                5:self.stat_path / f"mesh_{self.sd}" / self.sector_type / "FOREST_25.csv"},
+                3:self.stat_path / f"mesh_{self.sd}" / self.sector_type / "GROUPSIZE_9.csv",
+                4:self.stat_path / f"mesh_{self.sd}" / self.sector_type / "GROUPSIZE_16.csv",
+                5:self.stat_path / f"mesh_{self.sd}" / self.sector_type / "GROUPSIZE_25.csv"},
             "ALIGNMENT":{
-                "in-line":self.stat_path / f"mesh_{self.sd}" / self.sector_type / "FOREST_9.csv",
-                "staggered":self.stat_path / f"mesh_{self.sd}" / self.sector_type / "QUINCUX_8.csv",
+                "in-line":self.stat_path / f"mesh_{self.sd}" / self.sector_type / "GROUPSIZE_9.csv",
+                "staggered":self.stat_path / f"mesh_{self.sd}" / self.sector_type / "ALIGNMENT_8.csv",
             #   15:f"{self.stat_path} / f"mesh_{self.sd}" / self.sector_type / QUINCUX_16.csv",
             #   23:f"{self.stat_path} / f"mesh_{self.sd}" / self.sector_type / QUINCUX_23.csv"       
                 }
@@ -64,13 +64,13 @@ class HP_plotter():
         # path for generic exps
         self.exp_df_dict_generic = {
             "GROUP SIZE":{
-                3:self.stat_path / f"mesh_{self.sd}" / self.sector_type / "FOREST_9.csv",
-                4:self.stat_path / f"mesh_{self.sd}" / self.sector_type / "FOREST_16.csv",
-                5:self.stat_path / f"mesh_{self.sd}" / self.sector_type / "FOREST_25.csv"},
+                3:self.stat_path / f"mesh_{self.sd}" / self.sector_type / "GROUPSIZE_9.csv",
+                4:self.stat_path / f"mesh_{self.sd}" / self.sector_type / "GROUPSIZE_16.csv",
+                5:self.stat_path / f"mesh_{self.sd}" / self.sector_type / "GROUPSIZE_25.csv"},
             "ALIGNMENT":{
-                8:self.stat_path / f"mesh_{self.sd}" / self.sector_type / "QUINCUX_8.csv",
-                15:self.stat_path / f"mesh_{self.sd}" / self.sector_type / "QUINCUX_16.csv",
-                23:self.stat_path / f"mesh_{self.sd}" / self.sector_type / "QUINCUX_23.csv"
+                8:self.stat_path / f"mesh_{self.sd}" / self.sector_type / "ALIGNMENT_8.csv",
+                15:self.stat_path / f"mesh_{self.sd}" / self.sector_type / "ALIGNMENT_14.csv",
+                23:self.stat_path / f"mesh_{self.sd}" / self.sector_type / "ALIGNMENT_23.csv"
                 }
             }
         
@@ -94,6 +94,8 @@ class HP_plotter():
         # for descr-respvar table
         self.idx = pd.IndexSlice
         self.df = self.get_df()
+        # data table of group reference simulation.
+        self.data_ref = None # 
         
     def get_df(self):
         """reads all stat csv into a single df (var x [param, sector, row])
@@ -248,6 +250,9 @@ class HP_plotter():
             for j,diff_value in enumerate(diff_values[cat_param]):
                 df_cat = self.df.T.set_index("param_value",append=True).loc[cat_param,self.var]
                 df_cat_diff = (df_cat.loc[self.idx[:,:,diff_value]] - df_cat.loc[self.idx[:,:,self.ref_values[cat_param]]])
+                # keep ref data
+                df_ref = df_cat.loc[self.idx[:,:,self.ref_values[cat_param]]]
+                self.data_ref = df_ref.loc[self.idx[:,locs[cat_param]]].reset_index().pivot(index="level_0", columns="level_1")
                 # plots
                 data = df_cat_diff.loc[self.idx[:,locs[cat_param]]].reset_index().pivot(index="level_0", columns="level_1")
                 # circles
@@ -272,14 +277,14 @@ class HP_plotter():
         plt.tight_layout()
         plt.savefig(self.out_path / f"3_diff_{self.var}.jpeg", dpi=150,bbox_inches='tight')
 
-    def plot_sector_single(self):
+    def plot_sector_singleRef(self):
         param = "SINGLE"
-        fig, ax = plt.subplots(figsize=(3.8,4))
+        fig, ax = plt.subplots(figsize=(1.9,2))
         df_single = self.df.T.set_index("param_value",append=True).loc[param,self.var]
         # plots
         data = df_single.reset_index().pivot(index="level_0", columns="level_1")[self.var]
         sectors_dict = self.get_sectors(n=1)
-        cbar_norm, cbar_cmap = self.plot_sectors(data=data, sectors_dict=sectors_dict, scale_f=1, cmap_dyn_range=1, ax=ax, cmap="coolwarm")
+        cbar_norm, cbar_cmap = self.plot_sectors(data=data, sectors_dict=sectors_dict, scale_f=1, cmap_dyn_range=1, ax=ax, cmap="coolwarm", cb_vmax=1.5)
         # cosmetics
         cbar_ax = fig.add_axes([1, 0.061, 0.03, 0.91])
         cb = fig.colorbar(mpl.cm.ScalarMappable(norm=cbar_norm, cmap=cbar_cmap),
@@ -288,8 +293,25 @@ class HP_plotter():
         ax.set_axis_off()
         fig.supxlabel("")
         plt.tight_layout()
-        fig.savefig(self.out_path / f"2_sector_single_{self.var}.jpeg", dpi=150, bbox_inches="tight")
-    
+        fig.savefig(self.out_path / f"2_sector_singleRef_{self.var}.png", dpi=150, transparent=True, bbox_inches="tight")
+
+    def plot_sector_groupRef(self):
+        fig_circ, axes_circ = plt.subplots(sharey=True, sharex=True,figsize=(11.4,4))
+        # ref data sector plot
+        sectors_dict = self.get_sectors(n=3)
+        cbar_norm, cbar_cmap = self.plot_sectors(data=self.data_ref, sectors_dict=sectors_dict, scale_f=1, cmap_dyn_range=1, ax=axes_circ, cmap="coolwarm")
+        # cosmetics
+        axes_circ.yaxis.set_ticks_position('none')
+        axes_circ.set_yticklabels("")
+        axes_circ.set_axis_off()
+        cbar_ax = fig_circ.add_axes([1, 0.061, 0.03, 0.91])
+        cb = fig_circ.colorbar(mpl.cm.ScalarMappable(norm=cbar_norm, cmap=cbar_cmap),
+                    cax=cbar_ax, orientation='vertical',extend='both')
+        cb.set_label(label='$SMD_{mean}$ [$kg/m^2$]',fontsize=self.fs_cb)
+        # plt.subplots_adjust(top=1.3)
+        plt.tight_layout()
+        fig_circ.savefig(self.out_path / f"2bis_sector_groupRef_{self.var}.png", dpi=150, transparent=True, bbox_inches="tight")
+
     def plot_corr(self):
         regions = ["in_polar","inWw_polar","inLee_polar","out_polar","outWw_polar","outLee_polar"]
         nlocs_list = [[4],[5],[6]] # ,[4,5,6],[5,6]
@@ -373,7 +395,12 @@ class HP_plotter():
             cmap = kwargs["cmap"]
         cmap = mpl.cm.get_cmap(cmap)
         # norm = mpl.colors.Normalize(vmin=-max(abs(data).max()) * cmap_dyn_range, vmax=max(abs(data).max()) * cmap_dyn_range)
-        norm = mpl.colors.Normalize(vmin=-0.4, vmax=0.4)
+        if "cb_vmax" not in kwargs.keys():
+            cb_vmax = 0.4
+        else:
+            cb_vmax = kwargs["cb_vmax"]
+        
+        norm = mpl.colors.Normalize(vmin=-cb_vmax, vmax=cb_vmax)
 
         if "ax" not in kwargs.keys():
             fig, ax = plt.subplots(figsize=(20,5))

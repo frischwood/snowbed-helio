@@ -33,9 +33,6 @@ if __name__ == "__main__":
     # generic topology
     hp_plotter.plot_generic_topo()
 
-    # plot single
-    hp_plotter.plot_sector_single()
-
     # all simulations
     hp_plotter.plot_exp_group()
 
@@ -44,3 +41,7 @@ if __name__ == "__main__":
 
     # correlations
     hp_plotter.plot_corr()
+
+    # plot sectorial SMD of reference simulations
+    hp_plotter.plot_sector_singleRef()
+    hp_plotter.plot_sector_groupRef()
