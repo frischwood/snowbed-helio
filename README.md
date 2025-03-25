@@ -18,7 +18,7 @@ To reproduce the results follow the instructions in Section 2.
 The analysis code supports the following platforms : Linux, Darwin, Windows. Here conda-based python environment management is used. 
 1. clone this repository:\
 `git clone "my_repo`
-2. Download simulations folder from EnviDat () to your preferred location: `path_to_simu_folder`
+2. Download simulations folder from EnviDat (https://www.doi.org/10.16904/envidat.589) to your preferred location: `path_to_simu_folder`
 3. Setup environment:\
 `conda env create -f requirements.yaml`
 4. Compute statistics (needed once only):\
