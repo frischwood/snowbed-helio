@@ -1,0 +1,6 @@
+analysis/
+samples/
+experiments/
+*ipynb
+*pyc
+*.DS_Store
