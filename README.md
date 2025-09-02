@@ -4,7 +4,13 @@ This repository contains the code and instructions to reproduce the results from
 If you use this code or data in your research, please cite:
 
 ```bibtex
-Frischholz, Yael and Hames, Océane and Lehning, Michael, Optimizing Snow Distribution in Alpine Pv Systems: Cfd-Based Design Guidelines for Power Plant Layout. Available at SSRN: https://ssrn.com/abstract=5208643 or http://dx.doi.org/10.2139/ssrn.5208643
+Yael Frischholz, Océane Hames, Michael Lehning,
+Optimizing snow distribution in alpine PV systems: CFD-based design guidelines for power plant layout,
+Cold Regions Science and Technology,
+2025,
+104654,
+ISSN 0165-232X,
+https://doi.org/10.1016/j.coldregions.2025.104654.
 ```
 
 To reproduce the results follow the instructions in Section 2.  
